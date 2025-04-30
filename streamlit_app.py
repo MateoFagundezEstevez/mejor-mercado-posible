@@ -10,7 +10,7 @@ if st.button("Buscar mercado ideal") and producto:
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     
     respuesta = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Sos un asesor de comercio internacional que recomienda mercados para productos."},
             {"role": "user", "content": f"Produzco {producto}. ¿Dónde me conviene venderlo y por qué?"}
