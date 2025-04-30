@@ -1,6 +1,5 @@
 import streamlit as st
-from openai import OpenAI
-from openai import OpenAIError, RateLimitError
+from openai import OpenAI, APIStatusError
 
 st.title("¿Dónde puedo vender mi producto?")
 st.write("Escribí qué producís y dónde, y te sugeriremos mercados potenciales.")
@@ -21,11 +20,11 @@ if st.button("Buscar mercado ideal") and producto:
 
         st.success(respuesta.choices[0].message.content)
 
-    except RateLimitError:
-        st.error("🚫 Superaste el límite de uso de tu cuenta OpenAI. Esperá un momento y volvé a intentarlo.")
-
-    except OpenAIError as e:
-        st.error(f"💥 Ocurrió un error con OpenAI: {str(e)}")
+    except APIStatusError as e:
+        if "rate_limit" in str(e).lower():
+            st.error("🚫 Superaste el límite de uso de tu cuenta OpenAI. Esperá un momento y volvé a intentarlo.")
+        else:
+            st.error(f"💥 Ocurrió un error con OpenAI: {str(e)}")
 
     except Exception as e:
         st.error(f"⚠️ Error inesperado: {str(e)}")
