@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+from openai import OpenAIError, RateLimitError
 
 st.title("¿Dónde puedo vender mi producto?")
 st.write("Escribí qué producís y dónde, y te sugeriremos mercados potenciales.")
@@ -7,14 +8,24 @@ st.write("Escribí qué producís y dónde, y te sugeriremos mercados potenciale
 producto = st.text_input("¿Qué producís y en qué lugar?")
 
 if st.button("Buscar mercado ideal") and producto:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-    
-    respuesta = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "Sos un asesor de comercio internacional que recomienda mercados para productos."},
-            {"role": "user", "content": f"Produzco {producto}. ¿Dónde me conviene venderlo y por qué?"}
-        ]
-    )
-    
-    st.success(respuesta.choices[0].message.content)
+    try:
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+        respuesta = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Sos un asesor de comercio internacional que recomienda mercados para productos."},
+                {"role": "user", "content": f"Produzco {producto}. ¿Dónde me conviene venderlo y por qué?"}
+            ]
+        )
+
+        st.success(respuesta.choices[0].message.content)
+
+    except RateLimitError:
+        st.error("🚫 Superaste el límite de uso de tu cuenta OpenAI. Esperá un momento y volvé a intentarlo.")
+
+    except OpenAIError as e:
+        st.error(f"💥 Ocurrió un error con OpenAI: {str(e)}")
+
+    except Exception as e:
+        st.error(f"⚠️ Error inesperado: {str(e)}")
